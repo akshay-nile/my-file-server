@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title> MyFileServer </title>
+
+    <link rel="stylesheet" href="/static/stylesheets/welcome.css">
+    <script src="/static/javascripts/jquery-3.5.1.min.js"></script>
+</head>
+
+<body>
+    <script>
+        var uploading = false;
+        $('body').hide();
+    </script>
+
+    <div class="path">{{meta}}</div>
+
+    <hr></hr>
+
+    <div class="drives">
+        <div id="drive-pannel">
+            {% for drive in drives %}
+            <table class="drive">
+                <tr height="50px" path="{{drive.path}}">
+                    <td width="55px" class="un-selectable drive-icon-td">
+                        <img class="drive-icon" src="/static/images/icons/driveicon.jpg" width="55px">
+                    </td>
+                    <td class="un-selectable drive-name-td">
+                        <div class="drive-name">{{drive.name}}</div> <br>
+                        <div class="drive-info">{{drive.sizeinfo.total}} total&emsp;|&emsp;{{drive.sizeinfo.used}} used&emsp;|&emsp;{{drive.sizeinfo.free}} free</div>
+                    </td>
+                    <td width="20px" class="un-selectable drive-open-td">
+                        <img src="/static/images/icons/openicon.jpg" width="20px">
+                    </td>
+                </tr>
+            </table>
+            <hr class="drive-gap"></hr>
+            {% endfor %}
+        </div>
+    </div>
+
+    <hr></hr>
+
+    <div>
+        <table align="center" id="libs">
+            <tr>
+                {% for lib in libraries %}
+                <td width="120px" path="{{lib.path}}" class="un-selectable">
+                    <div align="center">
+                        <img src="/static/images/icons/{{lib.icon}}" class="lib-icon" width="60px">
+                    </div>
+                    <div class="lib-name">{{lib.name}}</div>
+                </td>
+                {% endfor %}
+            </tr>
+            <tr>
+                {% for short in shortcuts %}
+                <td width="120px" path="{{short.path}}" class="un-selectable">
+                    <div align="center">
+                        <img src="/static/images/icons/{{short.icon}}" class="lib-icon" width="50px" height="50px">
+                    </div>
+                    <div class="lib-name">{{short.name}}</div>
+                </td>
+                {% endfor %}
+            </tr>
+        </table>
+    </div>
+
+    <hr></hr>
+
+    <div align="center">
+        <form action="/upload" method="POST" enctype="multipart/form-data" id="uploader">
+            <input class="choose-file un-selectable" type="file" name="files" required multiple />
+            <input class="upload-button un-selectable" type="submit" value="Upload" />
+        </form>
+    </div>
+
+    <br>
+
+    <script src="/static/javascripts/welcome.js"></script>
+</body>
+
+
+</html>

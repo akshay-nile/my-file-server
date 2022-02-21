@@ -1,0 +1,51 @@
+<hr></hr>
+
+<div id="folder-pannel">
+    {% for folder in folders %}
+    <table class="item">
+        <tr height="50px" path="{{folder.path}}">
+            <td width="50px" class="un-selectable folder-icon">
+                <img class="item-icon" src="/static/images/icons/foldericon.jpg" width="50px" height="50px">
+            </td>
+            <td class="un-selectable folder-name">
+                <div class="item-name">{{folder.name}}</div> <br>
+                <div class="item-info">{{folder.sizeinfo}}&emsp;|&emsp;{{folder.dateinfo}}</div>
+            </td>
+            <td width="20px" class="un-selectable folder-open">
+                <img src="/static/images/icons/openicon.jpg" width="20px">
+            </td>
+        </tr>
+    </table>
+    <hr class="item-gap"></hr>
+    {% endfor %}
+</div>
+
+{% if files and folders %}
+<hr class="item-gap"></hr>
+{% endif %}
+
+<div id="file-pannel">
+    {% for file in files %}
+    <table class="item">
+        <tr height="50px" path="{{file.path}}">
+            <td width="50px" class="un-selectable file-icon">
+                <img class="item-icon" src="/static/images/icons/fileicon.jpg" id="{{file.thumbid}}" width="50px" height="50px">
+            </td>
+            <td class="un-selectable file-name">
+                <div class="item-name">{{file.name}}</div> <br>
+                <div class="item-info">{{file.sizeinfo}}&emsp;|&emsp;{{file.dateinfo}}</div>
+            </td>
+            <td width="20px" class="un-selectable file-download">
+                <img src="/static/images/icons/downicon.jpg" width="20px">
+            </td>
+        </tr>
+    </table>
+    <hr class="item-gap"></hr>
+    {% endfor %}
+</div>
+
+{% if not files and not folders %}
+<div class="empty">Empty</div>
+{% endif %}
+
+<hr></hr>

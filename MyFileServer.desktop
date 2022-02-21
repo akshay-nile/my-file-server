@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=MyFileServer
+Exec=python3 /home/akshay/MyApps/MyFileServer/server.py
+Icon=/home/akshay/.local/share/icons/python-logo.png
+Terminal=true
