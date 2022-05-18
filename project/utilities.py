@@ -104,19 +104,9 @@ def files_and_folders(path, sortby='name', reverse=False, showhidden=False, sear
     return files, folders
 
 
-def get_ip_addresses(intf='*', iptype='*', ignore='lo'):
-    if intf not in '* all'.split():
-        try:
-            addrs = ifaddresses(intf)
-            if iptype.endswith('4'):
-                return addrs.get(AF_INET)[0]['addr']
-            if iptype.endswith('6'):
-                return addrs.get(AF_INET6)[0]['addr']
-            return addrs.get(AF_INET)[0]['addr'], addrs.get(AF_INET6)[0]['addr']
-        except Exception:
-            return
-
+def get_ip_addresses(ignore='lo'):
     intfs = []
+    
     for intf in interfaces():
         if intf in ignore.split():
             continue
@@ -128,36 +118,46 @@ def get_ip_addresses(intf='*', iptype='*', ignore='lo'):
 
 
 def ip_v4():
-    ipv4 = get_ip_addresses(intf='wlan0', iptype='IPv4')
-
-    if ipv4 is None:
+    ipv4 = list(filter(lambda x: x[1].startswith('192.168.'), get_ip_addresses()))
+    
+    if not ipv4:
         print('\nWi-LAN interface is not available!')
         if input('Run server on localhost? Yes/No: ').strip().lower().startswith('y'):
             return '127.0.0.1'
         exit()
+    
+    if len(ipv4) == 1:
+        return ipv4[0][1]
+    
+    print('\nMultiple IPv4 address found!\n')
+    print('\n'.join([f'[{i}] {addr[1]}' for i, addr in enumerate(ipv4)]) + '\n')
 
-    return ipv4
+    try:
+        return ipv4[int(input('Enter the index of desired IPv4: ').strip())][1]
+    except IndexError:
+        print('\nInvalid Index !')
+        exit()
 
 
 def ip_v6():
-    addrs = get_ip_addresses(ignore='lo wlan0')
+    addrs = list(filter(lambda x: not x[1].startswith('192.168.'), get_ip_addresses(ignore='lo wlan0')))
 
     if not addrs:
         print('\nUnable to extract IPv6 Address for this device!')
         print('No data network interface was found.')
         exit()
 
-    if len(addrs) > 1:
-        print('\nMultiple data network interfaces found!\n')
-        print('\n'.join([f'[{i}] {addr[1]}' for i, addr in enumerate(addrs)]) + '\n')
+    if len(addrs) == 1:
+        ipv6 = addrs[0][-1]
+    else:
+        print('\nMultiple IPv6 addresses found!\n')
+        print('\n'.join([f'[{i}] {addr[2]}' for i, addr in enumerate(addrs)]) + '\n')
 
         try:
-            ipv6 = addrs[int(input('Enter the index of desired interface: ').strip())][-1]
+            ipv6 = addrs[int(input('Enter the index of desired IPv6: ').strip())][2]
         except IndexError:
-            print('\nInvalid Index')
+            print('\nInvalid Index !')
             exit()
-    else:
-        ipv6 = addrs[0][-1]
 
     return ipv6 if '%' not in ipv6 else ipv6[:ipv6.index('%')]
 
