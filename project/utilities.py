@@ -145,45 +145,67 @@ def files_and_folders(path, sortby='name', reverse=False, showhidden=False, sear
     return files, folders
 
 
-def get_ip_addresses(intf='*', iptype='*', ignore='lo'):
-    if intf not in '* all'.split():
-        addrs = ifaddresses(intf)
-        if iptype.endswith('4'):
-            return addrs.get(AF_INET)[0]['addr']
-        if iptype.endswith('6'):
-            return addrs.get(AF_INET6)[0]['addr']
-        return addrs.get(AF_INET)[0]['addr'], addrs.get(AF_INET6)[0]['addr']
-
+def get_ip_addresses():
     intfs = []
-    for intf in interfaces():
-        if intf in ignore.split():
-            continue
-        if ifaddresses(intf).get(AF_INET):
-            addrs = ifaddresses(intf)
-            intfs.append((intf, addrs.get(AF_INET)[0]['addr'], addrs.get(AF_INET6)[0]['addr']))
-
+    
+    for intf_name in interfaces():
+        intf = ifaddresses(intf_name)
+        try:
+            ipv4 = intf[AF_INET][0]['addr']
+            ipv6 = intf[AF_INET6][0]['addr']
+            intfs.append((intf_name, ipv4, ipv6))
+        except KeyError:
+            continue 
+            
     return intfs
 
 
 def ip_v4():
-    try:
-        ipv4 = get_ip_addresses()[0][1]
-    except IndexError:
+    intfs = list(filter(lambda x: x[0].startswith('wlan'), get_ip_addresses()))
+    
+    if not intfs:
         print('\nWi-LAN interface is not available!')
         if input('Run server on localhost? Yes/No: ').strip().lower().startswith('y'):
             return '127.0.0.1'
         exit()
+    
+    if len(intfs) == 1:
+        return intfs[0][1]
+    
+    print('\nMultiple IPv4 address found!\n')
+    print('\n'.join([f'[{i}] {intf[1]}' for i, intf in enumerate(intfs)]) + '\n')
 
-    return ipv4
+    try:
+        return intfs[int(input('Enter the index of desired IPv4: ').strip())][1]
+    except IndexError:
+        print('\nInvalid Index !')
+        exit()
 
 
 def ip_v6():
-    try:
-        ipv6 = get_ip_addresses()[0][2]
-    except IndexError:
-        print('\nUnable to extract IPv6 Address for this device!')
-        input('Press ENTER key to exit.')
-        exit()
+    intfs = list(filter(lambda x: x[0].startswith('rmnet_data'), get_ip_addresses()))
+    
+    if not intfs:
+        intfs = list(filter(lambda x: x[0].startswith('wlan'), get_ip_addresses()))
+        if intfs:
+            print('\nNo active IPv6 address found for "rmnet_data" interface!')
+            print('Running the server on IPv6 address of "wlan" interface instead.\n')
+        else:
+            print('\nUnable to extract IPv6 address for this device!')
+            print('No data network interface was found.')
+            exit()
+
+    if len(intfs) == 1:
+        ipv6 = intfs[0][2]
+    else:
+        print('\nMultiple IPv6 addresses found!\n')
+        print('\n'.join([f'[{i}] {intf[2]}' for i, intf in enumerate(intfs)]) + '\n')
+
+        try:
+            ipv6 = intfs[int(input('Enter the index of desired IPv6: ').strip())][2]
+        except IndexError:
+            print('\nInvalid Index !')
+            exit()
 
     return ipv6 if '%' not in ipv6 else ipv6[:ipv6.index('%')]
 
