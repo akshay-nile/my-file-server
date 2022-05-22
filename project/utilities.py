@@ -1,8 +1,5 @@
 import os
-from threading import Thread
 from datetime import datetime
-from requests import post
-from netifaces import interfaces, ifaddresses, AF_INET, AF_INET6
 
 
 def remove_chars(string, *chars):
@@ -103,79 +100,3 @@ def files_and_folders(path, sortby='name', reverse=False, showhidden=False, sear
 
     return files, folders
 
-
-def get_ip_addresses():
-    intfs = []
-    
-    for intf_name in interfaces():
-        intf = ifaddresses(intf_name)
-        try:
-            ipv4 = intf[AF_INET][0]['addr']
-            ipv6 = intf[AF_INET6][0]['addr']
-            intfs.append((intf_name, ipv4, ipv6))
-        except KeyError:
-            continue 
-            
-    return intfs
-
-
-def ip_v4():
-    intfs = list(filter(lambda x: x[0].startswith('wlan'), get_ip_addresses()))
-    
-    if not intfs:
-        print('\nWi-LAN interface is not available!')
-        if input('Run server on localhost? Yes/No: ').strip().lower().startswith('y'):
-            return '127.0.0.1'
-        exit()
-    
-    if len(intfs) == 1:
-        return intfs[0][1]
-    
-    print('\nMultiple IPv4 address found!\n')
-    print('\n'.join([f'[{i}] {intf[1]}' for i, intf in enumerate(intfs)]) + '\n')
-
-    try:
-        return intfs[int(input('Enter the index of desired IPv4: ').strip())][1]
-    except IndexError:
-        print('\nInvalid Index !')
-        exit()
-
-
-def ip_v6():
-    intfs = list(filter(lambda x: x[0].startswith('rmnet_data'), get_ip_addresses()))
-    
-    if not intfs:
-        intfs = list(filter(lambda x: x[0].startswith('wlan'), get_ip_addresses()))
-        if intfs:
-            print('\nNo active IPv6 address found for "rmnet_data" interface!')
-            print('Running the server on IPv6 address of "wlan" interface instead.\n')
-        else:
-            print('\nUnable to extract IPv6 address for this device!')
-            print('No data network interface was found.')
-            exit()
-
-    if len(intfs) == 1:
-        ipv6 = intfs[0][2]
-    else:
-        print('\nMultiple IPv6 addresses found!\n')
-        print('\n'.join([f'[{i}] {intf[2]}' for i, intf in enumerate(intfs)]) + '\n')
-
-        try:
-            ipv6 = intfs[int(input('Enter the index of desired IPv6: ').strip())][2]
-        except IndexError:
-            print('\nInvalid Index !')
-            exit()
-
-    return ipv6 if '%' not in ipv6 else ipv6[:ipv6.index('%')]
-
-
-def publish_socket(sock):
-    def mysocket():
-        try:
-            res = post(f'https://akshaynile.pythonanywhere.com/mysocket?socket={sock}')
-            if res.text == 'success':
-                print(' * Socket publication was successful ✔️\n')
-        except Exception:
-            print(' * Socket publication attempt failed ❌\n')
-
-    Thread(target=mysocket).start()
