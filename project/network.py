@@ -1,5 +1,6 @@
 from threading import Thread
 from requests import post
+from time import sleep
 from netifaces import interfaces, ifaddresses, AF_INET, AF_INET6
 
 
@@ -85,6 +86,7 @@ def publish_socket(sock):
             if res.text == 'success':
                 print(' * Socket publication was successful √ \n')
         except Exception:
+            sleep(1)
             print(' * Socket publication attempt failed ╳ \n')
 
     Thread(target=mysocket).start()
