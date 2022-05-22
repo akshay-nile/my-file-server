@@ -31,6 +31,11 @@ try:
     import pyperclip
 except ImportError:
     install('pyperclip')
+    
+try:
+    import netifaces
+except ImportError:
+    install('netifaces')
 
 try:
     import requests

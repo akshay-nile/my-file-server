@@ -2,7 +2,7 @@ import project.dependencies
 
 import os
 from socket import gethostname
-from project import utilities, streaming
+from project import utilities, streaming, network
 from flask import Flask, render_template, request, redirect, jsonify, make_response
 
 
@@ -82,12 +82,9 @@ def thumbnails():
     return jsonify({'thumbnails': streaming.thumbnails(request, app)})
 
 
-if input('Run server on Public IPv6 address? Yes/No: ').strip().lower().startswith('y'):
-    ip, port = utilities.ip_v6(), 8849
-    utilities.publish_socket(f'[{ip}]:{port}')
-else:
-    ip, port = utilities.ip_v4(), 8849
-    utilities.publish_socket(f'{ip}:{port}')
+host, port = network.user_selection(), 8849
+network.publish_socket(f'{host}:{port}' if host.count('.') == 3 else f'[{host}]:{port}')
 
-print()
-app.run(host=ip, port=port, debug=False)
+os.system('cls')
+app.run(host=host, port=port, debug=False)
+

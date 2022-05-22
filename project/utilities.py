@@ -1,10 +1,7 @@
 import os
 import stat
-from threading import Thread
 from shutil import disk_usage
 from datetime import datetime
-from socket import gethostname, gethostbyname, getaddrinfo, AF_INET6
-from requests import post
 from pyperclip import paste
 
 
@@ -160,37 +157,3 @@ def files_and_folders(path, sortby='name', reverse=False, showhidden=False, sear
     folders.sort(key=lambda x: x[sortby], reverse=reverse)
 
     return files, folders
-
-
-def ip_v4():
-    ipv4 = gethostbyname(gethostname())
-
-    if ipv4 == '127.0.0.1':
-        print('\nWi-LAN interface is not available!')
-        if not input('Run server on localhost? Yes/No: ').strip().lower().startswith('y'):
-            exit()
-
-    return ipv4
-
-
-def ip_v6():
-    try:
-        ipv6 = getaddrinfo(gethostname(), None, AF_INET6)[2][4][0]
-    except Exception:
-        print('\nUnable to extract IPv6 Address for this device!')
-        input('Press ENTER key to exit.')
-        exit()
-
-    return ipv6 if '%' not in ipv6 else ipv6[:ipv6.index('%')]
-
-
-def publish_socket(sock):
-    def mysocket():
-        try:
-            res = post(f'https://akshaynile.pythonanywhere.com/mysocket?socket={sock}')
-            if res.text == 'success':
-                print(' * Socket publication was successful.\n')
-        except Exception:
-            print(' * Socket publication attempt failed !\n')
-
-    Thread(target=mysocket).start()
