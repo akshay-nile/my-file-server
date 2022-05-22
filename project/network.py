@@ -43,9 +43,13 @@ def user_selection():
             return '127.0.0.1'
         exit()
     
-    wlan = set(filter(lambda x: x[0].startswith('wlan'), all_intfs))
-    rmnet_data = set(filter(lambda x: x[0].startswith('rmnet_data'), all_intfs))
-    intfs = list(wlan) + list(rmnet_data) + list(all_intfs - wlan - rmnet_data)
+    wlan = list(filter(lambda x: x[0].startswith('wlan'), all_intfs))
+    wlan.sort(key=lambda x: x[0])
+    
+    rmnet_data = list(filter(lambda x: x[0].startswith('rmnet_data'), all_intfs))
+    rmnet_data.sort(key=lambda x: x[0])
+    
+    intfs = wlan + rmnet_data + list(all_intfs - set(wlan) - set(rmnet_data))
 
     print('Select network interface to host the server:')
     for i, intf in enumerate(intfs):
