@@ -13,7 +13,7 @@ def all_network_interfaces():
         
         try:
             ipv4 = intf[AF_INET][0]['addr']
-            if ipv4 == '127.0.0.1':
+            if ipv4 == '127.0.0.1' or ipv4 == '0.0.0.0':
                 continue
             intf_entry.append(ipv4)
         except (KeyError, IndexError):
@@ -21,11 +21,8 @@ def all_network_interfaces():
 
         try:
             ipv6 = intf[AF_INET6][0]['addr']
-            if ipv6.lower().startswith('fe80:'):
-                continue
-            if '%' in ipv6:
-                ipv6 = ipv6[:ipv6.index('%')]
-            intf_entry.append(ipv6)
+            if not ipv6.lower().startswith('fe80:'):
+                intf_entry.append(ipv6 if '%' not in ipv6 else ipv6[:ipv6.index('%')])
         except (KeyError, IndexError):
             pass
         
