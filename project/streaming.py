@@ -14,7 +14,7 @@ def favicon(app):
 
 def download(path):
     filename = path.split('/')[-1]
-    response = send_file(path, as_attachment=True, cache_timeout=-1)
+    response = send_file(path, as_attachment=True)
 
     response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
